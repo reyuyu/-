@@ -26,22 +26,19 @@ scripts/
 5. 左侧选择 `Build Mac Release`。
 6. 点击 `Run workflow`。
 7. 等它跑完，进入这次运行记录。
-8. 在页面底部 `Artifacts` 下载 `fenbi-helper-mac-release`。
+8. 在页面底部 `Artifacts` 下载对应架构的压缩包。
 
 下载后里面会有：
 
 ```text
 fenbi-helper-macos-arm64.tar.gz
 fenbi-helper-macos-x64.tar.gz
-fenbi-helper-mac-release.tar.gz
-Mac-README.md
 ```
 
 ## 给 Mac 用户发哪个
 
 - Apple 芯片 Mac：发 `fenbi-helper-macos-arm64.tar.gz`
 - Intel 芯片 Mac：发 `fenbi-helper-macos-x64.tar.gz`
-- 不确定用户芯片：发 `fenbi-helper-mac-release.tar.gz`
 
 让用户解压后按 `Mac-README.md` 操作。
 

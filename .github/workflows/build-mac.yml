@@ -11,12 +11,29 @@ on:
       - 'scripts/**'
       - 'package.json'
       - 'package-lock.json'
+      - 'Mac-README.md'
       - '.github/workflows/build-mac.yml'
 
 jobs:
   build-mac:
-    name: Build macOS binaries
-    runs-on: macos-latest
+    name: Build ${{ matrix.label }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Apple Silicon
+            runner: macos-26
+            script: build:mac:arm64
+            folder: Apple-Silicon-M1-M4
+            binary: fenbi-helper-macos-arm64
+            artifact: fenbi-helper-macos-arm64
+          - label: Intel
+            runner: macos-26-intel
+            script: build:mac:x64
+            folder: Intel-Mac
+            binary: fenbi-helper-macos-x64
+            artifact: fenbi-helper-macos-x64
 
     steps:
       - name: Checkout
@@ -31,21 +48,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Mac release folder
-        run: npm run build:mac:release
+      - name: Build binary
+        run: npm run ${{ matrix.script }}
 
-      - name: Create archives with executable permissions
+      - name: Prepare release folder
+        run: |
+          mkdir -p "dist/mac-release/${{ matrix.folder }}"
+          cp "dist/${{ matrix.binary }}" "dist/mac-release/${{ matrix.folder }}/fenbi-helper"
+          chmod +x "dist/mac-release/${{ matrix.folder }}/fenbi-helper"
+          cp "Mac-README.md" "dist/mac-release/Mac-README.md"
+
+      - name: Create archive
         run: |
           cd dist/mac-release
-          tar -czf fenbi-helper-macos-arm64.tar.gz "Apple-Silicon-M1-M4"
-          tar -czf fenbi-helper-macos-x64.tar.gz "Intel-Mac"
-          tar -czf fenbi-helper-mac-release.tar.gz .
+          tar -czf "${{ matrix.artifact }}.tar.gz" "${{ matrix.folder }}" "Mac-README.md"
 
-      - name: Upload Mac artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fenbi-helper-mac-release
-          path: |
-            dist/mac-release/*.tar.gz
-            dist/mac-release/Mac-README.md
+          name: ${{ matrix.artifact }}
+          path: dist/mac-release/${{ matrix.artifact }}.tar.gz
           if-no-files-found: error

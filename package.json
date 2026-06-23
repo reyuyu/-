@@ -8,8 +8,8 @@
     "start:desktop": "node src/launcher.js",
     "build:launcher": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-launcher.ps1",
     "build:win": "pkg src/launcher.js --targets node18-win-x64 --output dist/fenbi-helper.exe",
-    "build:mac:x64": "pkg src/launcher.js --targets node18-macos-x64 --output dist/fenbi-helper-macos-x64",
-    "build:mac:arm64": "pkg src/launcher.js --targets node18-macos-arm64 --output dist/fenbi-helper-macos-arm64",
+    "build:mac:x64": "pkg src/launcher.js --targets node16-macos-x64 --output dist/fenbi-helper-macos-x64",
+    "build:mac:arm64": "pkg src/launcher.js --targets node16-macos-arm64 --output dist/fenbi-helper-macos-arm64",
     "build:mac": "npm run build:mac:x64 && npm run build:mac:arm64",
     "build:mac:release": "node scripts/build-mac-release.js",
     "test": "echo \"Error: no test specified\" && exit 1"
