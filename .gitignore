@@ -132,3 +132,6 @@ data/
 FenbiHelper.exe
 *.exe
 *.app
+
+# Raw screen recordings copied from chat or desktop
+QQ*.mp4

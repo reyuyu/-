@@ -4,6 +4,10 @@
 
 > 本项目仅用于个人学习辅助。粉笔账号、Cookie、DeepSeek API Key 都应只保存在使用者自己的电脑上，不要上传到公开仓库。
 
+## 演示视频
+
+[点击观看 Fenbi Helper 使用演示](./docs/assets/fenbi-helper-demo.mp4)
+
 ## 主要功能
 
 - 粉笔扫码登录
