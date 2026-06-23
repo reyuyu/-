@@ -15,7 +15,7 @@
 - 针对行测不同板块使用不同 AI 提示词
 - 言语理解题支持生成词语、成语、近义辨析笔记
 - 笔记本支持搜索、排序、编辑和查看来源例题
-- 支持 Windows 本地启动和 Mac 自动打包
+- 支持 Windows 本地启动和 Mac 便携版自动打包
 
 ## 环境要求
 
@@ -26,7 +26,7 @@
 - 一个可扫码登录的粉笔账号
 - 可选：DeepSeek API Key
 
-Mac 普通用户如果使用打包版本，不需要安装 Node.js。
+Mac 普通用户如果使用打包版本，不需要安装 Node.js，压缩包里已经自带 Node。
 
 ## 本地快速启动
 
@@ -122,7 +122,7 @@ dist/fenbi-helper.exe
 
 ## Mac 使用
 
-推荐使用 GitHub Actions 自动打包 Mac 版本，避免在 Windows 本地交叉构建失败。
+推荐使用 GitHub Actions 自动打包 Mac 便携版，避免在 Windows 本地交叉构建失败。
 
 工作流文件已经内置：
 
@@ -172,9 +172,9 @@ Not able to build for 'macos' here, only for 'win'
 
 说明 Windows 本机不能构建 macOS 目标。请使用 GitHub Actions 或直接在 Mac 上打包。
 
-### 为什么 Actions 里会显示 Compiling Node.js from sources？
+### 为什么不再用 pkg 打 Mac 包？
 
-`pkg` 需要一个定制过的 Node 基础运行时。如果远程缓存没有对应版本，它会在 GitHub 的 macOS runner 上现场编译。第一次可能比较久。工作流已经缓存 `~/.pkg-cache`，第一次成功后，后续同架构构建会快很多。
+`pkg` 的 macOS 运行时缓存经常 404，随后会现场编译 Node，耗时很长。现在 Mac 版改成便携版文件夹，里面自带 Node、源码和依赖，用户仍然不用安装 Node，但构建更稳定。
 
 ### DeepSeek 能读题目图片吗？
 

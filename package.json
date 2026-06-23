@@ -12,6 +12,7 @@
     "build:mac:arm64": "pkg src/launcher.js --targets node16-macos-arm64 --output dist/fenbi-helper-macos-arm64",
     "build:mac": "npm run build:mac:x64 && npm run build:mac:arm64",
     "build:mac:release": "node scripts/build-mac-release.js",
+    "build:mac:portable": "node scripts/build-mac-portable.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

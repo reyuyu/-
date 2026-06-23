@@ -24,15 +24,11 @@ jobs:
         include:
           - label: Apple Silicon
             runner: macos-26
-            script: build:mac:arm64
             folder: Apple-Silicon-M1-M4
-            binary: fenbi-helper-macos-arm64
             artifact: fenbi-helper-macos-arm64
           - label: Intel
             runner: macos-26-intel
-            script: build:mac:x64
             folder: Intel-Mac
-            binary: fenbi-helper-macos-x64
             artifact: fenbi-helper-macos-x64
 
     steps:
@@ -45,26 +41,11 @@ jobs:
           node-version: 18
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install production dependencies
+        run: npm ci --omit=dev
 
-      - name: Cache pkg base binaries
-        uses: actions/cache@v4
-        with:
-          path: ~/.pkg-cache
-          key: pkg-cache-${{ runner.os }}-${{ runner.arch }}-${{ matrix.binary }}-node16-v3.6
-          restore-keys: |
-            pkg-cache-${{ runner.os }}-${{ runner.arch }}-${{ matrix.binary }}-
-
-      - name: Build binary
-        run: npm run ${{ matrix.script }}
-
-      - name: Prepare release folder
-        run: |
-          mkdir -p "dist/mac-release/${{ matrix.folder }}"
-          cp "dist/${{ matrix.binary }}" "dist/mac-release/${{ matrix.folder }}/fenbi-helper"
-          chmod +x "dist/mac-release/${{ matrix.folder }}/fenbi-helper"
-          cp "Mac-README.md" "dist/mac-release/Mac-README.md"
+      - name: Build portable release folder
+        run: npm run build:mac:portable
 
       - name: Create archive
         run: |

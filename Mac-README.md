@@ -11,16 +11,16 @@
 
 1. 解压下载的 `.tar.gz` 文件。
 2. 进入解压后的文件夹。
-3. 双击 `fenbi-helper`。
-4. 如果 macOS 提示无法打开，右键点 `fenbi-helper`，选择“打开”，再确认一次。
+3. 双击 `fenbi-helper.command`。
+4. 如果 macOS 提示无法打开，右键点 `fenbi-helper.command`，选择“打开”，再确认一次。
 5. 程序会自动打开浏览器，进入做题台。
 6. 第一次使用请先扫码登录粉笔账号。
 
 如果双击没有反应，打开“终端”，进入对应文件夹后执行：
 
 ```bash
-chmod +x ./fenbi-helper
-./fenbi-helper
+chmod +x ./fenbi-helper.command
+./fenbi-helper.command
 ```
 
 ## 数据保存在哪里
@@ -37,7 +37,7 @@ config.json
 data/verbal-notebook.json
 ```
 
-所以不要只移动 `fenbi-helper` 一个文件，最好保留整个文件夹。
+所以不要只移动 `fenbi-helper.command` 一个文件，最好保留整个文件夹。
 
 ## 退出
 
