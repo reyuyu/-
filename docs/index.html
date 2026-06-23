@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fenbi Helper 使用演示</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f0e8;
+      --panel: #fffdf8;
+      --text: #263332;
+      --muted: #6f7a76;
+      --line: #d9cfc0;
+      --accent: #71897c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    main {
+      width: min(1100px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 48px 0;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .player {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 18px 50px rgba(45, 38, 26, 0.12);
+    }
+
+    video {
+      display: block;
+      width: 100%;
+      max-height: 78vh;
+      background: #111;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Fenbi Helper 使用演示</h1>
+    <p>本页面用于 GitHub Pages 在线预览项目演示视频。如果视频没有自动加载，可以点击下方链接直接打开视频文件。</p>
+
+    <section class="player">
+      <video controls preload="metadata" src="./assets/fenbi-helper-demo.mp4">
+        当前浏览器不支持直接播放视频。
+      </video>
+    </section>
+
+    <div class="actions">
+      <a href="./assets/fenbi-helper-demo.mp4">直接打开视频</a>
+      <a href="../README.md">返回 README</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -6,7 +6,10 @@
 
 ## 演示视频
 
-[点击观看 Fenbi Helper 使用演示](./docs/assets/fenbi-helper-demo.mp4)
+- [GitHub Pages 在线预览](https://reyuyu.github.io/-/)
+- [直接打开视频文件](./docs/assets/fenbi-helper-demo.mp4)
+
+如果在线预览暂时打不开，请在仓库 `Settings` → `Pages` 中启用 GitHub Pages，来源选择 `main` 分支的 `/docs` 目录。
 
 ## 主要功能
 
