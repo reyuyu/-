@@ -37,8 +37,8 @@ jobs:
       - name: Create archives with executable permissions
         run: |
           cd dist/mac-release
-          tar -czf fenbi-helper-macos-arm64.tar.gz "Apple芯片M1-M4"
-          tar -czf fenbi-helper-macos-x64.tar.gz "Intel芯片"
+          tar -czf fenbi-helper-macos-arm64.tar.gz "Apple-Silicon-M1-M4"
+          tar -czf fenbi-helper-macos-x64.tar.gz "Intel-Mac"
           tar -czf fenbi-helper-mac-release.tar.gz .
 
       - name: Upload Mac artifacts
@@ -47,5 +47,5 @@ jobs:
           name: fenbi-helper-mac-release
           path: |
             dist/mac-release/*.tar.gz
-            dist/mac-release/Mac使用说明.md
+            dist/mac-release/Mac-README.md
           if-no-files-found: error

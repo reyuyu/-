@@ -34,19 +34,19 @@ run('npm', ['run', 'build:mac']);
 
 copyFile(
     path.join(distDir, 'fenbi-helper-macos-arm64'),
-    path.join(releaseDir, 'Apple芯片M1-M4', 'fenbi-helper')
+    path.join(releaseDir, 'Apple-Silicon-M1-M4', 'fenbi-helper')
 );
 copyFile(
     path.join(distDir, 'fenbi-helper-macos-x64'),
-    path.join(releaseDir, 'Intel芯片', 'fenbi-helper')
+    path.join(releaseDir, 'Intel-Mac', 'fenbi-helper')
 );
 
 const guide = `# Mac 使用说明
 
 ## 选择哪个版本
 
-- Apple 芯片 Mac：进入 \`Apple芯片M1-M4\` 文件夹。
-- Intel 芯片 Mac：进入 \`Intel芯片\` 文件夹。
+- Apple 芯片 Mac：进入 \`Apple-Silicon-M1-M4\` 文件夹。
+- Intel 芯片 Mac：进入 \`Intel-Mac\` 文件夹。
 
 不知道芯片类型时，点左上角苹果图标，选择“关于本机”查看。
 
@@ -81,7 +81,7 @@ data/verbal-notebook.json
 关闭启动后的终端窗口，或者在终端里按 \`Ctrl+C\`。
 `;
 
-fs.writeFileSync(path.join(releaseDir, 'Mac使用说明.md'), guide, 'utf8');
+fs.writeFileSync(path.join(releaseDir, 'Mac-README.md'), guide, 'utf8');
 
 console.log('');
 console.log(`Mac release is ready: ${releaseDir}`);

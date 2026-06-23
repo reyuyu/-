@@ -35,6 +35,9 @@
   "devDependencies": {
     "@yao-pkg/pkg": "^6.20.0"
   },
+  "overrides": {
+    "into-stream": "6.0.0"
+  },
   "pkg": {
     "assets": [
       "src/views/**/*"

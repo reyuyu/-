@@ -144,7 +144,7 @@ dist/fenbi-helper.exe
 fenbi-helper-macos-arm64.tar.gz
 fenbi-helper-macos-x64.tar.gz
 fenbi-helper-mac-release.tar.gz
-Mac使用说明.md
+Mac-README.md
 ```
 
 选择方式：

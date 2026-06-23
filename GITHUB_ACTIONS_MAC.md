@@ -34,7 +34,7 @@ scripts/
 fenbi-helper-macos-arm64.tar.gz
 fenbi-helper-macos-x64.tar.gz
 fenbi-helper-mac-release.tar.gz
-Mac使用说明.md
+Mac-README.md
 ```
 
 ## 给 Mac 用户发哪个
@@ -43,7 +43,7 @@ Mac使用说明.md
 - Intel 芯片 Mac：发 `fenbi-helper-macos-x64.tar.gz`
 - 不确定用户芯片：发 `fenbi-helper-mac-release.tar.gz`
 
-让用户解压后按 `Mac使用说明.md` 操作。
+让用户解压后按 `Mac-README.md` 操作。
 
 ## 为什么这样能解决
 
