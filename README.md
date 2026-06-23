@@ -172,6 +172,10 @@ Not able to build for 'macos' here, only for 'win'
 
 说明 Windows 本机不能构建 macOS 目标。请使用 GitHub Actions 或直接在 Mac 上打包。
 
+### 为什么 Actions 里会显示 Compiling Node.js from sources？
+
+`pkg` 需要一个定制过的 Node 基础运行时。如果远程缓存没有对应版本，它会在 GitHub 的 macOS runner 上现场编译。第一次可能比较久。工作流已经缓存 `~/.pkg-cache`，第一次成功后，后续同架构构建会快很多。
+
 ### DeepSeek 能读题目图片吗？
 
 当前默认模型 `deepseek-chat` 主要基于文本回答，不能直接读取题图。如果题目依赖图片，AI 解答只能基于题干文本和选项。后续如果接入多模态模型，可以再补图片理解能力。

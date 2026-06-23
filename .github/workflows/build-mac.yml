@@ -48,6 +48,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Cache pkg base binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/.pkg-cache
+          key: pkg-cache-${{ runner.os }}-${{ runner.arch }}-${{ matrix.binary }}-node16-v3.6
+          restore-keys: |
+            pkg-cache-${{ runner.os }}-${{ runner.arch }}-${{ matrix.binary }}-
+
       - name: Build binary
         run: npm run ${{ matrix.script }}
 
