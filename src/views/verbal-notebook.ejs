@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>言语理解笔记本</title>
+    <style>
+        :root {
+            --paper: #f4f1ea;
+            --surface: #fffdf8;
+            --soft: #ebe5da;
+            --line: #d9d0c2;
+            --text: #343d3a;
+            --muted: #7a817c;
+            --sage: #708579;
+            --sage-2: #8da196;
+            --blue: #7d929c;
+            --clay: #b98f7e;
+            --mauve: #aa9aa3;
+            --warn: #b87f69;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--paper);
+            color: var(--text);
+            font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+            font-size: 15px;
+        }
+
+        button, input, textarea { font: inherit; }
+        button { border: 0; cursor: pointer; }
+        a { color: inherit; text-decoration: none; }
+
+        .page {
+            max-width: 1260px;
+            margin: 0 auto;
+            padding: 28px clamp(18px, 4vw, 44px);
+        }
+
+        .topbar {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 30px;
+            letter-spacing: 0;
+        }
+
+        .subtitle {
+            margin: 8px 0 0;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .btn {
+            min-height: 38px;
+            padding: 0 14px;
+            border-radius: 7px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn.primary {
+            background: var(--sage);
+            border-color: var(--sage);
+            color: #fff;
+        }
+
+        .btn.warn {
+            background: var(--clay);
+            border-color: var(--clay);
+            color: #fff;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: minmax(260px, 1fr) auto auto;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .input, .textarea {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            background: var(--surface);
+            color: var(--text);
+            padding: 10px 12px;
+        }
+
+        .textarea {
+            min-height: 120px;
+            resize: vertical;
+            line-height: 1.8;
+            overflow: hidden;
+        }
+
+        .sort-tabs {
+            display: inline-grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            padding: 5px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255, 253, 248, .66);
+        }
+
+        .sort-tab {
+            min-height: 32px;
+            padding: 0 12px;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--muted);
+        }
+
+        .sort-tab.active {
+            background: var(--sage);
+            color: #fff;
+        }
+
+        .stats {
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .notebook {
+            display: grid;
+            grid-template-columns: 340px minmax(0, 1fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .list-panel,
+        .detail-panel {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255, 253, 248, .76);
+        }
+
+        .list-panel {
+            overflow: hidden;
+        }
+
+        .list-head {
+            padding: 14px;
+            border-bottom: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .word-list {
+            max-height: calc(100vh - 220px);
+            overflow: auto;
+            padding: 10px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .word-card {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--text);
+            text-align: left;
+        }
+
+        .word-card:hover,
+        .word-card.active {
+            border-color: var(--sage-2);
+            background: #eef0ea;
+        }
+
+        .word-card strong {
+            display: block;
+            font-size: 18px;
+            line-height: 1.35;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .word-card p {
+            margin: 7px 0 0;
+            color: var(--muted);
+            line-height: 1.55;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .word-meta {
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .detail-panel {
+            min-height: 560px;
+            padding: 22px;
+        }
+
+        .detail-empty {
+            min-height: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        .detail-top {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) auto;
+            gap: 16px;
+            align-items: start;
+            margin-bottom: 18px;
+        }
+
+        .word-input {
+            font-size: 28px;
+            font-weight: 700;
+            padding: 8px 0;
+            border: 0;
+            border-bottom: 1px solid var(--line);
+            border-radius: 0;
+            background: transparent;
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 16px;
+        }
+
+        .field {
+            display: grid;
+            gap: 7px;
+        }
+
+        .field.wide {
+            grid-column: 1 / -1;
+        }
+
+        .field label {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 28px;
+        }
+
+        .chip {
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: var(--soft);
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .source-strip {
+            margin-top: 18px;
+            padding: 13px 14px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #f8f5ee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--muted);
+        }
+
+        .empty {
+            border: 1px solid var(--line);
+            background: rgba(255, 253, 248, .72);
+            border-radius: 8px;
+            padding: 34px;
+            text-align: center;
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 22px;
+            background: rgba(52, 61, 58, .28);
+            z-index: 50;
+        }
+
+        .modal.visible { display: flex; }
+
+        .modal-card {
+            width: min(860px, 100%);
+            max-height: 86vh;
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--surface);
+            padding: 18px;
+        }
+
+        .modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .modal-head h2 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .question-box {
+            padding: 14px;
+            border-left: 4px solid var(--mauve);
+            background: #f6f1e9;
+            line-height: 1.85;
+            margin: 12px 0;
+            white-space: pre-wrap;
+        }
+
+        .option-list {
+            display: grid;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .option {
+            padding: 9px 10px;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            background: rgba(255, 253, 248, .76);
+        }
+
+        .meta {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        @media (max-width: 900px) {
+            .toolbar {
+                grid-template-columns: 1fr;
+            }
+            .notebook {
+                grid-template-columns: 1fr;
+            }
+            .word-list {
+                max-height: 360px;
+            }
+            .field-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .topbar, .detail-top, .source-strip {
+                display: block;
+            }
+            .topbar .btn,
+            .detail-actions,
+            .source-strip .btn {
+                margin-top: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="topbar">
+        <div>
+            <h1>言语理解笔记本</h1>
+            <p class="subtitle">左侧是词语索引，右侧查看和编辑完整笔记。适合把近义词、成语和语境辨析长期积累起来。</p>
+        </div>
+        <a class="btn primary" href="/dashboard">返回主页</a>
+    </header>
+
+    <section class="toolbar">
+        <input id="searchInput" class="input" placeholder="搜索词语、含义、易混词">
+        <div class="sort-tabs" aria-label="排序方式">
+            <button class="sort-tab active" data-sort="time">按时间</button>
+            <button class="sort-tab" data-sort="alpha">按字母</button>
+        </div>
+        <div id="stats" class="stats">读取中...</div>
+    </section>
+
+    <section class="notebook">
+        <aside class="list-panel">
+            <div class="list-head">词语列表</div>
+            <div id="wordList" class="word-list"></div>
+        </aside>
+        <section id="detailPanel" class="detail-panel"></section>
+    </section>
+</main>
+
+<div id="exampleModal" class="modal">
+    <div class="modal-card">
+        <div class="modal-head">
+            <h2 id="modalTitle">来源例题</h2>
+            <button id="closeModal" class="btn">关闭</button>
+        </div>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+    const state = {
+        entries: [],
+        activeId: '',
+        query: '',
+        sort: 'time'
+    };
+
+    function $(id) { return document.getElementById(id); }
+
+    async function fetchJson(url, options = {}) {
+        const res = await fetch(url, options);
+        const data = await res.json();
+        if (!res.ok || data.code === 500) throw new Error(data.message || '请求失败');
+        return data;
+    }
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function formatDate(value) {
+        if (!value) return '';
+        return String(value).slice(0, 10);
+    }
+
+    function brief(value, max = 42) {
+        const text = String(value || '').replace(/\s+/g, ' ').trim();
+        return text.length > max ? `${text.slice(0, max)}...` : text;
+    }
+
+    function activeEntry() {
+        return state.entries.find(entry => entry.id === state.activeId) || null;
+    }
+
+    function visibleEntries() {
+        const q = state.query.trim().toLowerCase();
+        const list = state.entries.filter(entry => {
+            if (!q) return true;
+            return [
+                entry.word,
+                entry.meaning,
+                entry.distinction,
+                entry.tips,
+                ...(entry.confusables || [])
+            ].join(' ').toLowerCase().includes(q);
+        });
+        return list.sort((a, b) => {
+            if (state.sort === 'alpha') {
+                return String(a.word || '').localeCompare(String(b.word || ''), 'zh-Hans-CN');
+            }
+            return String(b.updatedAt || '').localeCompare(String(a.updatedAt || ''));
+        });
+    }
+
+    function autoGrow(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = `${Math.max(textarea.scrollHeight + 2, 120)}px`;
+    }
+
+    function bindAutoGrow(root = document) {
+        root.querySelectorAll('textarea').forEach(textarea => {
+            autoGrow(textarea);
+            textarea.addEventListener('input', () => autoGrow(textarea));
+        });
+    }
+
+    function renderList() {
+        const list = visibleEntries();
+        $('stats').innerText = `${list.length} / ${state.entries.length} 条`;
+        if (!list.length) {
+            $('wordList').innerHTML = '<div class="empty">没有匹配的词语。</div>';
+            return;
+        }
+        if (!list.some(entry => entry.id === state.activeId)) {
+            state.activeId = list[0].id;
+        }
+        $('wordList').innerHTML = list.map(entry => `
+            <button class="word-card ${entry.id === state.activeId ? 'active' : ''}" data-id="${entry.id}">
+                <strong>${escapeHtml(entry.word)}</strong>
+                <p>${escapeHtml(brief(entry.meaning || entry.distinction || '暂无说明'))}</p>
+                <span class="word-meta">
+                    <span>${escapeHtml((entry.confusables || []).slice(0, 2).join(' / ') || '无易混词')}</span>
+                    <span>${escapeHtml(formatDate(entry.updatedAt))}</span>
+                </span>
+            </button>
+        `).join('');
+        document.querySelectorAll('.word-card').forEach(card => {
+            card.addEventListener('click', () => {
+                state.activeId = card.dataset.id;
+                render();
+            });
+        });
+    }
+
+    function renderDetail() {
+        const entry = activeEntry();
+        if (!entry) {
+            $('detailPanel').innerHTML = '<div class="detail-empty">还没有词语笔记。做言语题交卷后，在 AI 解答旁点击“记笔记”来积累。</div>';
+            return;
+        }
+        $('detailPanel').innerHTML = `
+            <div class="detail-top">
+                <div>
+                    <input id="wordInput" class="input word-input" value="${escapeHtml(entry.word)}" aria-label="词语">
+                    <div class="meta">更新于 ${escapeHtml(formatDate(entry.updatedAt))}</div>
+                </div>
+                <div class="detail-actions">
+                    <button id="saveBtn" class="btn primary">保存修改</button>
+                    <button id="exampleBtn" class="btn">查看例题</button>
+                    <button id="deleteBtn" class="btn warn">删除</button>
+                </div>
+            </div>
+
+            <div class="field-grid">
+                <div class="field wide">
+                    <label>规范含义</label>
+                    <textarea id="meaningInput" class="textarea">${escapeHtml(entry.meaning)}</textarea>
+                </div>
+                <div class="field">
+                    <label>容易混淆</label>
+                    <input id="confusablesInput" class="input" value="${escapeHtml((entry.confusables || []).join('、'))}">
+                    <div class="chips">
+                        ${(entry.confusables || []).map(item => `<span class="chip">${escapeHtml(item)}</span>`).join('') || '<span class="chip">暂无</span>'}
+                    </div>
+                </div>
+                <div class="field">
+                    <label>考场提醒</label>
+                    <textarea id="tipsInput" class="textarea">${escapeHtml(entry.tips)}</textarea>
+                </div>
+                <div class="field wide">
+                    <label>辨析技巧</label>
+                    <textarea id="distinctionInput" class="textarea">${escapeHtml(entry.distinction)}</textarea>
+                </div>
+            </div>
+
+            <div class="source-strip">
+                <span>${escapeHtml(entry.exampleQuestion && entry.exampleQuestion.exerciseName || '来源例题')}</span>
+                <button id="exampleBtnBottom" class="btn">查看来源例题</button>
+            </div>
+        `;
+        $('saveBtn').addEventListener('click', saveActiveEntry);
+        $('deleteBtn').addEventListener('click', deleteActiveEntry);
+        $('exampleBtn').addEventListener('click', () => showExample(entry));
+        $('exampleBtnBottom').addEventListener('click', () => showExample(entry));
+        bindAutoGrow($('detailPanel'));
+    }
+
+    function render() {
+        renderList();
+        renderDetail();
+    }
+
+    async function loadEntries() {
+        try {
+            const data = await fetchJson('/api/verbal-notebook');
+            state.entries = data.entries || [];
+            const list = visibleEntries();
+            state.activeId = state.activeId || (list[0] && list[0].id) || '';
+            render();
+        } catch (error) {
+            $('wordList').innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+            $('detailPanel').innerHTML = '<div class="detail-empty">读取失败</div>';
+        }
+    }
+
+    async function saveActiveEntry() {
+        const entry = activeEntry();
+        if (!entry) return;
+        $('saveBtn').disabled = true;
+        try {
+            const data = await fetchJson(`/api/verbal-notebook/${encodeURIComponent(entry.id)}`, {
+                method: 'PATCH',
+                headers: {'content-type': 'application/json'},
+                body: JSON.stringify({
+                    word: $('wordInput').value,
+                    meaning: $('meaningInput').value,
+                    confusables: $('confusablesInput').value,
+                    distinction: $('distinctionInput').value,
+                    tips: $('tipsInput').value
+                })
+            });
+            const index = state.entries.findIndex(item => item.id === entry.id);
+            if (index >= 0) state.entries[index] = data.entry;
+            state.activeId = data.entry.id;
+            render();
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            const btn = $('saveBtn');
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    async function deleteActiveEntry() {
+        const entry = activeEntry();
+        if (!entry || !confirm('删除这条笔记？')) return;
+        await fetchJson(`/api/verbal-notebook/${encodeURIComponent(entry.id)}`, {method: 'DELETE'});
+        state.entries = state.entries.filter(item => item.id !== entry.id);
+        const list = visibleEntries();
+        state.activeId = list[0] && list[0].id || '';
+        render();
+    }
+
+    function showExample(entry) {
+        const q = entry && entry.exampleQuestion || {};
+        $('modalTitle').innerText = `${entry.word} · 来源例题`;
+        $('modalBody').innerHTML = `
+            <div class="meta">${escapeHtml(q.exerciseName || '')} ${q.questionId ? `· 题号 ${escapeHtml(q.questionId)}` : ''}</div>
+            ${q.material ? `<div class="question-box">${escapeHtml(q.material)}</div>` : ''}
+            <div class="question-box">${escapeHtml(q.stem || '暂无题干')}</div>
+            <div class="option-list">
+                ${(q.options || []).map((option, index) => `<div class="option">${String.fromCharCode(65 + index)}. ${escapeHtml(option)}</div>`).join('')}
+            </div>
+            <div class="question-box"><strong>标准答案：</strong>${escapeHtml(q.correctAnswer || '未知')}</div>
+            <div class="question-box"><strong>解析：</strong>${escapeHtml(q.solution || '暂无')}</div>
+            ${q.exerciseId ? `<a class="btn primary" href="/practice/${encodeURIComponent(q.exerciseId)}">打开这套练习</a>` : ''}
+        `;
+        $('exampleModal').classList.add('visible');
+    }
+
+    $('searchInput').addEventListener('input', event => {
+        state.query = event.target.value;
+        const list = visibleEntries();
+        state.activeId = list[0] && list[0].id || '';
+        render();
+    });
+    document.querySelectorAll('.sort-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            state.sort = btn.dataset.sort;
+            document.querySelectorAll('.sort-tab').forEach(item => item.classList.toggle('active', item === btn));
+            const list = visibleEntries();
+            state.activeId = list[0] && list[0].id || '';
+            render();
+        });
+    });
+    $('closeModal').addEventListener('click', () => $('exampleModal').classList.remove('visible'));
+    $('exampleModal').addEventListener('click', event => {
+        if (event.target === $('exampleModal')) $('exampleModal').classList.remove('visible');
+    });
+
+    loadEntries();
+</script>
+</body>
+</html>

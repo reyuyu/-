@@ -1,0 +1,1341 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>刷题练习</title>
+    <script>
+        window.MathJax = {
+            tex: {inlineMath: [['$', '$'], ['\\(', '\\)']]},
+            svg: {fontCache: 'global'}
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --paper: #f4f1ea;
+            --surface: #fffdf8;
+            --soft: #ebe5da;
+            --line: #d9d0c2;
+            --text: #343d3a;
+            --muted: #7a817c;
+            --sage: #708579;
+            --sage-2: #8da196;
+            --blue: #7d929c;
+            --clay: #b98f7e;
+            --mauve: #aa9aa3;
+            --ok: #6f8b76;
+            --warn: #b87f69;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--paper);
+            color: var(--text);
+            font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+            font-size: 15px;
+        }
+
+        button, textarea { font: inherit; }
+        button { border: 0; cursor: pointer; }
+        a { color: inherit; text-decoration: none; }
+
+        .shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 300px minmax(0, 1fr) 380px;
+        }
+
+        .sidebar {
+            border-right: 1px solid var(--line);
+            background: #ebe6dc;
+            padding: 18px;
+            overflow: auto;
+        }
+
+        .main {
+            min-width: 0;
+            padding: 22px clamp(22px, 4vw, 56px);
+            overflow: auto;
+        }
+
+        .ai-side {
+            border-left: 1px solid var(--line);
+            background: #eee8df;
+            padding: 18px;
+            overflow: auto;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .brand strong {
+            display: block;
+            font-size: 22px;
+        }
+
+        .brand span {
+            display: block;
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .actions, .row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            min-height: 36px;
+            padding: 0 14px;
+            border-radius: 7px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn.primary {
+            background: var(--sage);
+            border-color: var(--sage);
+            color: #fff;
+        }
+
+        .btn.warn {
+            background: var(--clay);
+            border-color: var(--clay);
+            color: #fff;
+        }
+
+        .btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .btn.thinking {
+            gap: 8px;
+            opacity: .82;
+        }
+
+        .thinking-dots {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .thinking-dots i {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: .45;
+            animation: thinkingPulse 1s ease-in-out infinite;
+        }
+
+        .thinking-dots i:nth-child(2) { animation-delay: .16s; }
+        .thinking-dots i:nth-child(3) { animation-delay: .32s; }
+
+        @keyframes thinkingPulse {
+            0%, 80%, 100% { transform: translateY(0); opacity: .35; }
+            40% { transform: translateY(-3px); opacity: 1; }
+        }
+
+        .panel {
+            border: 1px solid var(--line);
+            background: rgba(255, 253, 248, .78);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .panel-title {
+            margin: 0 0 12px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .history-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .history-item {
+            width: 100%;
+            padding: 11px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: var(--surface);
+            color: var(--text);
+            text-align: left;
+        }
+
+        .history-item:hover, .history-item.active {
+            border-color: var(--sage-2);
+        }
+
+        .history-item strong {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .meta {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .question-nav {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .nav-dot {
+            aspect-ratio: 1;
+            border-radius: 7px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--muted);
+        }
+
+        .nav-dot.current {
+            color: #fff;
+            background: var(--blue);
+            border-color: var(--blue);
+        }
+
+        .nav-dot.answered {
+            color: var(--sage);
+            border-color: var(--sage-2);
+            background: #e2e9df;
+        }
+
+        .empty {
+            max-width: 540px;
+            margin: 120px auto;
+            color: var(--muted);
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        .question-card {
+            max-width: 980px;
+        }
+
+        .question-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 16px;
+        }
+
+        .question-title {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .status {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .status.ok { color: var(--ok); }
+        .status.warn { color: var(--warn); }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: var(--soft);
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .content {
+            line-height: 1.95;
+            font-size: 17px;
+        }
+
+        .content p { margin: 0 0 10px; }
+
+        .material {
+            padding: 14px 16px;
+            border-left: 4px solid var(--mauve);
+            background: rgba(255, 253, 248, .72);
+            margin-bottom: 16px;
+        }
+
+        .content img, .option img, .analysis img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 8px 0;
+            border-radius: 5px;
+        }
+
+        .options {
+            display: grid;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .option {
+            display: grid;
+            grid-template-columns: 34px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--text);
+            text-align: left;
+        }
+
+        .option:hover { border-color: var(--sage-2); }
+        .option.selected { border-color: var(--sage); background: #e5ebe4; }
+        .option.correct { border-color: var(--ok); background: #e3eadf; }
+        .option.wrong { border-color: var(--warn); background: #f0e1da; }
+
+        .letter {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--soft);
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .option.selected .letter {
+            color: #fff;
+            background: var(--sage);
+        }
+
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .analysis {
+            max-width: 980px;
+            margin-top: 22px;
+            display: none;
+        }
+
+        .analysis.visible { display: block; }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 16px;
+            align-items: start;
+        }
+
+        .answer-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .answer-box {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+        }
+
+        .answer-box strong {
+            display: block;
+            margin-top: 4px;
+            color: var(--sage);
+            font-size: 20px;
+        }
+
+        .solution {
+            line-height: 1.9;
+            font-size: 16px;
+        }
+
+        .ai-card {
+            position: sticky;
+            top: 18px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .chat {
+            display: grid;
+            gap: 10px;
+            max-height: 460px;
+            overflow: auto;
+            padding-right: 4px;
+        }
+
+        .image-note {
+            display: none;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #d8c4b8;
+            background: #f3e8e2;
+            color: #8b604f;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .image-note.visible {
+            display: block;
+        }
+
+        .message {
+            border-radius: 8px;
+            padding: 10px 12px;
+            line-height: 1.75;
+        }
+
+        .message.assistant {
+            background: #eef0ea;
+            border: 1px solid var(--line);
+        }
+
+        .message.user {
+            background: #e3ebe9;
+            border: 1px solid #cad9d5;
+        }
+
+        .message.thinking-message {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--muted);
+        }
+
+        .message h1,
+        .message h2,
+        .message h3 {
+            margin: 10px 0 8px;
+            line-height: 1.35;
+        }
+
+        .message h1 { font-size: 20px; }
+        .message h2 { font-size: 18px; }
+        .message h3 { font-size: 16px; }
+
+        .message p {
+            margin: 0 0 8px;
+        }
+
+        .message ul,
+        .message ol {
+            margin: 6px 0 10px 22px;
+            padding: 0;
+        }
+
+        .message blockquote {
+            margin: 8px 0;
+            padding: 8px 10px;
+            border-left: 3px solid var(--mauve);
+            background: rgba(255, 253, 248, .62);
+            color: var(--muted);
+        }
+
+        .message table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            background: var(--surface);
+            font-size: 14px;
+        }
+
+        .message th,
+        .message td {
+            border: 1px solid var(--line);
+            padding: 7px 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .message th {
+            background: var(--soft);
+            color: var(--text);
+        }
+
+        .message pre {
+            overflow: auto;
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 7px;
+            border: 1px solid var(--line);
+            background: #f8f5ee;
+        }
+
+        .message code {
+            padding: 1px 4px;
+            border-radius: 4px;
+            background: #f8f5ee;
+            font-family: Consolas, "SFMono-Regular", monospace;
+            font-size: .92em;
+        }
+
+        .message pre code {
+            padding: 0;
+            background: transparent;
+        }
+
+        .chat-input {
+            width: 100%;
+            min-height: 84px;
+            resize: vertical;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--text);
+        }
+
+        .note-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 22px;
+            background: rgba(52, 61, 58, .28);
+            z-index: 60;
+        }
+
+        .note-modal.visible { display: flex; }
+
+        .note-dialog {
+            width: min(900px, 100%);
+            max-height: 86vh;
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--surface);
+            padding: 18px;
+        }
+
+        .note-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .note-head h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .note-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .note-item {
+            display: grid;
+            gap: 10px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #f8f5ee;
+            padding: 12px;
+        }
+
+        .note-item-head {
+            display: grid;
+            grid-template-columns: auto minmax(120px, 220px) minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
+        }
+
+        .note-field {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            background: var(--surface);
+            color: var(--text);
+            padding: 9px 10px;
+        }
+
+        .note-area {
+            min-height: 72px;
+            resize: vertical;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 1100px) {
+            .shell { grid-template-columns: 240px minmax(0, 1fr); }
+            .ai-side { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
+            .analysis-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 760px) {
+            .shell { display: block; }
+            .sidebar { border-right: 0; border-bottom: 1px solid var(--line); max-height: 360px; }
+            .answer-summary { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar">
+        <section class="panel">
+            <p class="panel-title">入口</p>
+            <div class="row">
+                <a class="btn primary" href="/dashboard">主页</a>
+                <a class="btn" href="/verbal-notebook">言语笔记本</a>
+            </div>
+        </section>
+        <section class="panel">
+            <p class="panel-title">最近记录</p>
+            <div id="historyList" class="history-list"><div class="status">加载中...</div></div>
+        </section>
+        <section id="navPanel" class="panel" style="display:none;">
+            <p class="panel-title">题号</p>
+            <div id="questionNav" class="question-nav"></div>
+        </section>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="brand">
+                <strong id="exerciseName">选择一套练习开始</strong>
+                <span id="syncStatus" class="status">本地就绪</span>
+            </div>
+            <div class="actions">
+                <button id="reloadBtn" class="btn">刷新</button>
+                <button id="submitBtn" class="btn warn">交卷</button>
+            </div>
+        </header>
+
+        <div id="emptyState" class="empty">
+            从左侧选择刷题记录，或回到主页创建一套新练习。
+        </div>
+
+        <section id="practiceView" class="question-card" style="display:none;">
+            <div class="question-head">
+                <div>
+                    <h1 id="questionTitle" class="question-title"></h1>
+                    <div id="questionTags" class="tags"></div>
+                </div>
+                <div id="progressText" class="status"></div>
+            </div>
+
+            <div class="content">
+                <div id="materialBox" class="material" style="display:none;"></div>
+                <div id="questionContent"></div>
+            </div>
+            <div id="options" class="options"></div>
+
+            <div class="footer">
+                <button id="prevBtn" class="btn">上一题</button>
+                <div class="status"><span id="doneCount">0</span> 已答 / <span id="remainCount">0</span> 剩余</div>
+                <button id="nextBtn" class="btn primary">下一题</button>
+            </div>
+        </section>
+
+        <section id="analysisPanel" class="analysis">
+            <div class="answer-summary">
+                <div class="answer-box">标准答案<strong id="correctAnswerText">-</strong></div>
+                <div class="answer-box">你的答案<strong id="myAnswerText">-</strong></div>
+                <div class="answer-box">结果<strong id="answerResultText">-</strong></div>
+            </div>
+
+            <div id="imageNote" class="image-note">本题包含图片。页面会正常显示图片，但当前 DeepSeek 文本接口不会读取图片内容，AI 只能基于题干文字、选项和粉笔解析回答。</div>
+            <div class="analysis-grid">
+                <section class="panel">
+                    <p class="panel-title">标准解析</p>
+                    <div id="solutionContent" class="solution"></div>
+                </section>
+            </div>
+        </section>
+    </main>
+    <aside class="ai-side">
+        <section class="panel ai-card">
+            <p class="panel-title">AI 追问</p>
+            <div id="sideImageNote" class="image-note">本题包含图片。DeepSeek 当前仅基于文字信息回答，不能直接读图。</div>
+            <div class="row">
+                <button id="aiExplainBtn" class="btn primary">生成本题思路</button>
+                <button id="noteBtn" class="btn" style="display:none;">记笔记</button>
+                <span id="threadStatus" class="status">切题会清空追问线程</span>
+            </div>
+            <div id="chatBox" class="chat"></div>
+            <textarea id="chatInput" class="chat-input" placeholder="追问本题，例如：有没有更快的排除法？"></textarea>
+            <button id="sendChatBtn" class="btn primary">追问</button>
+        </section>
+    </aside>
+</div>
+
+<div id="noteModal" class="note-modal">
+    <div class="note-dialog">
+        <div class="note-head">
+            <div>
+                <h2>言语理解笔记</h2>
+                <div id="noteStatus" class="status">勾选想积累的词语，保存到笔记本。</div>
+            </div>
+            <button id="closeNoteModal" class="btn">关闭</button>
+        </div>
+        <div id="noteList" class="note-list"></div>
+        <div class="row" style="margin-top:14px;justify-content:flex-end;">
+            <a class="btn" href="/verbal-notebook" target="_blank">打开笔记本</a>
+            <button id="saveNoteBtn" class="btn primary">保存选中词语</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const INITIAL_EXERCISE_ID = '<%= exerciseId || "" %>';
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const state = {
+        history: [],
+        exercise: null,
+        questions: [],
+        current: 0,
+        answers: {},
+        submitted: false,
+        chat: [],
+        startedAt: Date.now(),
+        aiExplainLoading: false,
+        noteLoading: false,
+        noteCandidates: []
+    };
+
+    function $(id) { return document.getElementById(id); }
+    function storageKey() { return state.exercise ? `fenbi-practice-${state.exercise.id}` : ''; }
+    function threadKey() {
+        const q = currentQuestion();
+        return q ? `fenbi-thread-${state.exercise.id}-${q.questionId}` : '';
+    }
+    function saveLocal() {
+        if (!storageKey()) return;
+        localStorage.setItem(storageKey(), JSON.stringify({answers: state.answers, submitted: state.submitted}));
+    }
+    function loadLocal() {
+        if (!storageKey()) return {answers: {}, submitted: false};
+        try {
+            const data = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+            return data.answers ? data : {answers: data, submitted: false};
+        } catch (error) {
+            return {answers: {}, submitted: false};
+        }
+    }
+    function clearThread() {
+        if (threadKey()) localStorage.removeItem(threadKey());
+        state.chat = [];
+        renderChat();
+    }
+    function loadThread() {
+        try {
+            state.chat = JSON.parse(localStorage.getItem(threadKey()) || '[]');
+        } catch (error) {
+            state.chat = [];
+        }
+        renderChat();
+    }
+    function saveThread() {
+        if (threadKey()) localStorage.setItem(threadKey(), JSON.stringify(state.chat.slice(-8)));
+    }
+    function setAiExplainLoading(loading) {
+        state.aiExplainLoading = loading;
+        const btn = $('aiExplainBtn');
+        btn.disabled = loading;
+        btn.classList.toggle('thinking', loading);
+        btn.innerHTML = loading
+            ? '思考中 <span class="thinking-dots" aria-hidden="true"><i></i><i></i><i></i></span>'
+            : '生成本题思路';
+    }
+    function setNoteLoading(loading) {
+        state.noteLoading = loading;
+        const btn = $('noteBtn');
+        btn.disabled = loading;
+        btn.classList.toggle('thinking', loading);
+        btn.innerHTML = loading
+            ? '整理中 <span class="thinking-dots" aria-hidden="true"><i></i><i></i><i></i></span>'
+            : '记笔记';
+    }
+    function htmlToText(html) {
+        const el = document.createElement('div');
+        el.innerHTML = html || '';
+        return el.innerText.trim();
+    }
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+    function isVerbalQuestion(q) {
+        const text = [
+            state.exercise && state.exercise.name,
+            q && q.source,
+            ...((q && q.keypoints) || []),
+            ...((q && q.tags) || []),
+            q && q.content,
+            q && q.material
+        ].map(htmlToText).join(' ');
+        return /言语|逻辑填空|实词填空|虚词填空|词的辨析|词义|词义侧重|词语辨析|近义词|关联词|片段阅读|语句表达|中心理解|主旨|意图|标题|排序|接语|词语|成语|病句|歧义|篇章阅读|填入画横线|依次填入|最恰当/.test(text);
+    }
+    function hasImageHtml(html) {
+        return /<img\b/i.test(String(html || ''));
+    }
+    function questionHasImage(q) {
+        return Boolean(q && (
+            hasImageHtml(q.content) ||
+            hasImageHtml(q.material) ||
+            (q.options || []).some(option => hasImageHtml(option))
+        ));
+    }
+    function visibleQuestionHasImage() {
+        const roots = [$('materialBox'), $('questionContent'), $('options')];
+        return roots.some(root => root && root.querySelector('img'));
+    }
+    function renderMath(root = document.body) {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise([root]).catch(() => {});
+        }
+    }
+    function markdown(text) {
+        const escapeHtml = value => String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        const sanitizeHtml = html => {
+            const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+            doc.querySelectorAll('script, iframe, object, embed').forEach(node => node.remove());
+            doc.body.querySelectorAll('*').forEach(node => {
+                [...node.attributes].forEach(attr => {
+                    const name = attr.name.toLowerCase();
+                    const value = attr.value || '';
+                    if (name.startsWith('on') || /^javascript:/i.test(value)) {
+                        node.removeAttribute(attr.name);
+                    }
+                });
+            });
+            return doc.body.innerHTML;
+        };
+        if (window.marked && window.marked.parse) {
+            window.marked.setOptions({breaks: true, gfm: true});
+            return sanitizeHtml(window.marked.parse(String(text || '')));
+        }
+        const inline = value => escapeHtml(value)
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>');
+        const lines = String(text || '').replace(/\r\n/g, '\n').split('\n');
+        const out = [];
+        let i = 0;
+
+        const isTableLine = line => /^\s*\|.*\|\s*$/.test(line);
+        const isDivider = line => /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
+
+        while (i < lines.length) {
+            const line = lines[i];
+            if (!line.trim()) {
+                i += 1;
+                continue;
+            }
+
+            if (/^```/.test(line.trim())) {
+                const code = [];
+                i += 1;
+                while (i < lines.length && !/^```/.test(lines[i].trim())) {
+                    code.push(lines[i]);
+                    i += 1;
+                }
+                i += 1;
+                out.push(`<pre><code>${escapeHtml(code.join('\n'))}</code></pre>`);
+                continue;
+            }
+
+            if (isTableLine(line) && i + 1 < lines.length && isDivider(lines[i + 1])) {
+                const headers = line.trim().replace(/^\||\|$/g, '').split('|').map(cell => inline(cell.trim()));
+                i += 2;
+                const rows = [];
+                while (i < lines.length && isTableLine(lines[i])) {
+                    rows.push(lines[i].trim().replace(/^\||\|$/g, '').split('|').map(cell => inline(cell.trim())));
+                    i += 1;
+                }
+                out.push([
+                    '<table>',
+                    `<thead><tr>${headers.map(cell => `<th>${cell}</th>`).join('')}</tr></thead>`,
+                    `<tbody>${rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}</tbody>`,
+                    '</table>'
+                ].join(''));
+                continue;
+            }
+
+            const heading = line.match(/^(#{1,3})\s+(.+)$/);
+            if (heading) {
+                const level = heading[1].length;
+                out.push(`<h${level}>${inline(heading[2])}</h${level}>`);
+                i += 1;
+                continue;
+            }
+
+            if (/^\s*>\s?/.test(line)) {
+                const parts = [];
+                while (i < lines.length && /^\s*>\s?/.test(lines[i])) {
+                    parts.push(lines[i].replace(/^\s*>\s?/, ''));
+                    i += 1;
+                }
+                out.push(`<blockquote>${inline(parts.join('\n')).replace(/\n/g, '<br>')}</blockquote>`);
+                continue;
+            }
+
+            if (/^\s*[-*]\s+/.test(line)) {
+                const items = [];
+                while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
+                    items.push(lines[i].replace(/^\s*[-*]\s+/, ''));
+                    i += 1;
+                }
+                out.push(`<ul>${items.map(item => `<li>${inline(item)}</li>`).join('')}</ul>`);
+                continue;
+            }
+
+            if (/^\s*\d+\.\s+/.test(line)) {
+                const items = [];
+                while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
+                    items.push(lines[i].replace(/^\s*\d+\.\s+/, ''));
+                    i += 1;
+                }
+                out.push(`<ol>${items.map(item => `<li>${inline(item)}</li>`).join('')}</ol>`);
+                continue;
+            }
+
+            const paragraph = [line];
+            i += 1;
+            while (
+                i < lines.length &&
+                lines[i].trim() &&
+                !/^(#{1,3})\s+/.test(lines[i]) &&
+                !/^```/.test(lines[i].trim()) &&
+                !/^\s*[-*]\s+/.test(lines[i]) &&
+                !/^\s*\d+\.\s+/.test(lines[i]) &&
+                !/^\s*>\s?/.test(lines[i]) &&
+                !(isTableLine(lines[i]) && i + 1 < lines.length && isDivider(lines[i + 1]))
+            ) {
+                paragraph.push(lines[i]);
+                i += 1;
+            }
+            out.push(`<p>${inline(paragraph.join('\n')).replace(/\n/g, '<br>')}</p>`);
+        }
+
+        return out.join('');
+    }
+    function setStatus(text, tone) {
+        $('syncStatus').innerText = text;
+        $('syncStatus').className = `status ${tone || ''}`;
+    }
+    function correctChoiceIndex(q) {
+        if (!q) return null;
+        if (Number.isInteger(q.correctAnswer)) return q.correctAnswer;
+        const raw = String(q.correctAnswer == null ? '' : q.correctAnswer).trim();
+        if (/^\d+$/.test(raw)) return Number(raw);
+        const letter = raw.match(/[A-F]/i);
+        return letter ? letters.indexOf(letter[0].toUpperCase()) : null;
+    }
+    function answerLabel(value) {
+        return Number.isInteger(value) && value >= 0 ? (letters[value] || String(value + 1)) : '未作答';
+    }
+    async function fetchJson(url, options = {}) {
+        const res = await fetch(url, options);
+        const data = await res.json();
+        if (!res.ok || data.code === 500) throw new Error(data.message || '请求失败');
+        return data;
+    }
+    function currentQuestion() { return state.questions[state.current]; }
+
+    async function loadHistory() {
+        try {
+            state.history = await fetchJson('/api/practice/history');
+            renderHistory();
+        } catch (error) {
+            $('historyList').innerHTML = `<div class="status warn">${error.message}</div>`;
+        }
+    }
+    function renderHistory() {
+        if (!state.history.length) {
+            $('historyList').innerHTML = '<div class="status">暂无记录</div>';
+            return;
+        }
+        $('historyList').innerHTML = state.history.slice(0, 18).map(item => `
+            <button class="history-item ${state.exercise && state.exercise.id == item.id ? 'active' : ''}" data-id="${item.id}">
+                <strong>${item.name || '未命名练习'}</strong>
+                <span class="meta"><span>${item.answerCount || 0} 题</span><span>${item.finishedTime || ''}</span></span>
+            </button>
+        `).join('');
+        $('historyList').querySelectorAll('.history-item').forEach(btn => {
+            btn.addEventListener('click', () => loadExercise(btn.dataset.id));
+        });
+    }
+    async function loadExercise(exerciseId) {
+        $('emptyState').style.display = 'none';
+        $('practiceView').style.display = 'block';
+        setStatus('正在加载', '');
+        let data;
+        try {
+            data = await fetchJson(`/api/practice/${exerciseId}`);
+        } catch (error) {
+            $('questionContent').innerHTML = `<div class="status warn">${error.message}</div>`;
+            setStatus('读取失败', 'warn');
+            return;
+        }
+        state.exercise = data.exercise;
+        state.questions = data.questions || [];
+        state.current = 0;
+        const local = loadLocal();
+        state.answers = local.answers || {};
+        state.submitted = Boolean(local.submitted);
+        state.questions.forEach(q => {
+            if (q.savedChoice !== null && state.answers[q.questionId] == null) {
+                state.answers[q.questionId] = {choice: q.savedChoice, time: q.savedTime || 0};
+            }
+        });
+        saveLocal();
+        $('exerciseName').innerText = state.exercise.name || '刷题练习';
+        $('navPanel').style.display = 'block';
+        renderHistory();
+        renderAll(true);
+        setStatus(state.submitted ? '已交卷' : '已加载', 'ok');
+        history.replaceState(null, '', `/practice/${exerciseId}`);
+    }
+    function renderAll(resetThread) {
+        renderNav();
+        renderQuestion();
+        renderProgress();
+        renderAnalysis();
+        if (resetThread) clearThread();
+        else loadThread();
+    }
+    function goQuestion(index) {
+        if (index === state.current) return;
+        clearThread();
+        state.current = Math.max(0, Math.min(state.questions.length - 1, index));
+        renderAll(true);
+    }
+    function renderNav() {
+        $('questionNav').innerHTML = state.questions.map((q, index) => `
+            <button class="nav-dot ${index === state.current ? 'current' : ''} ${state.answers[q.questionId] ? 'answered' : ''}" data-index="${index}">${index + 1}</button>
+        `).join('');
+        $('questionNav').querySelectorAll('.nav-dot').forEach(btn => {
+            btn.addEventListener('click', () => goQuestion(Number(btn.dataset.index)));
+        });
+    }
+    function renderQuestion() {
+        const q = currentQuestion();
+        if (!q) return;
+        const answered = state.answers[q.questionId];
+        const correct = correctChoiceIndex(q);
+        $('questionTitle').innerText = `第 ${state.current + 1} 题`;
+        $('questionTags').innerHTML = [...(q.keypoints || []), ...(q.tags || [])].slice(0, 8).map(tag => `<span class="tag">${tag}</span>`).join('');
+        $('materialBox').style.display = q.material ? 'block' : 'none';
+        $('materialBox').innerHTML = q.material || '';
+        $('questionContent').innerHTML = q.content || '';
+        $('options').innerHTML = (q.options || []).map((option, index) => `
+            <button class="option ${answered && answered.choice === index ? 'selected' : ''} ${state.submitted && index === correct ? 'correct' : ''} ${state.submitted && answered && answered.choice === index && index !== correct ? 'wrong' : ''}" data-choice="${index}">
+                <span class="letter">${letters[index]}</span>
+                <span>${String(option).replace(/^<p>/, '').replace(/<\/p>$/, '')}</span>
+            </button>
+        `).join('');
+        $('options').querySelectorAll('.option').forEach(btn => {
+            btn.addEventListener('click', () => chooseAnswer(Number(btn.dataset.choice)));
+        });
+        $('progressText').innerText = `${state.current + 1} / ${state.questions.length}`;
+        renderMath($('practiceView'));
+    }
+    function renderProgress() {
+        const done = Object.keys(state.answers).length;
+        $('doneCount').innerText = done;
+        $('remainCount').innerText = Math.max(0, state.questions.length - done);
+    }
+    function renderAnalysis() {
+        const q = currentQuestion();
+        const hasVisibleImage = visibleQuestionHasImage();
+        $('noteBtn').style.display = q && state.submitted && isVerbalQuestion(q) ? 'inline-flex' : 'none';
+        $('analysisPanel').classList.toggle('visible', Boolean(q && state.submitted));
+        $('sideImageNote').classList.toggle('visible', hasVisibleImage);
+        if (!q || !state.submitted) return;
+        $('imageNote').classList.toggle('visible', hasVisibleImage);
+        const correct = correctChoiceIndex(q);
+        const answered = state.answers[q.questionId];
+        $('correctAnswerText').innerText = answerLabel(correct);
+        $('myAnswerText').innerText = answerLabel(answered && answered.choice);
+        $('answerResultText').innerText = answered && answered.choice === correct ? '正确' : '待复盘';
+        $('solutionContent').innerHTML = q.solution || '<span class="status">暂无粉笔解析</span>';
+        renderMath($('analysisPanel'));
+    }
+    async function chooseAnswer(choice) {
+        if (state.submitted) return;
+        const q = currentQuestion();
+        const old = state.answers[q.questionId];
+        const elapsed = Math.max(1, Math.round((Date.now() - state.startedAt) / 1000));
+        state.answers[q.questionId] = {choice, time: (old && old.time || 0) + elapsed};
+        state.startedAt = Date.now();
+        saveLocal();
+        renderAll(false);
+        setStatus('正在同步', '');
+        try {
+            const data = await fetchJson(`/api/practice/${state.exercise.id}/answer`, {
+                method: 'POST',
+                headers: {'content-type': 'application/json'},
+                body: JSON.stringify({questionIndex: q.idx - 1, questionId: q.questionId, choice, time: state.answers[q.questionId].time})
+            });
+            setStatus(data.synced ? '已同步粉笔' : '本地保存', data.synced ? 'ok' : 'warn');
+        } catch (error) {
+            setStatus('本地保存', 'warn');
+        }
+    }
+    async function submitExercise() {
+        if (!state.exercise) return;
+        setStatus('正在交卷', '');
+        const answers = state.questions.map(q => {
+            const answer = state.answers[q.questionId];
+            return answer ? {questionIndex: q.idx - 1, questionId: q.questionId, choice: answer.choice, time: answer.time || 1} : null;
+        }).filter(Boolean);
+        try {
+            const data = await fetchJson(`/api/practice/${state.exercise.id}/submit`, {
+                method: 'POST',
+                headers: {'content-type': 'application/json'},
+                body: JSON.stringify({answers})
+            });
+            state.submitted = true;
+            saveLocal();
+            renderAll(true);
+            setStatus(data.synced ? '交卷已同步' : '本地已交卷，粉笔同步失败', data.synced ? 'ok' : 'warn');
+        } catch (error) {
+            state.submitted = true;
+            saveLocal();
+            renderAll(true);
+            setStatus('本地已交卷，粉笔同步失败', 'warn');
+        }
+    }
+    function questionPayload() {
+        const q = currentQuestion();
+        return {
+            questionId: q.questionId,
+            stem: htmlToText(q.content),
+            material: htmlToText(q.material),
+            options: (q.options || []).map(htmlToText),
+            correctAnswer: answerLabel(correctChoiceIndex(q)),
+            solution: htmlToText(q.solution),
+            keypoints: q.keypoints || [],
+            tags: q.tags || [],
+            source: q.source || '',
+            exerciseName: state.exercise && state.exercise.name || '',
+            hasImage: visibleQuestionHasImage(),
+            imageNotice: visibleQuestionHasImage() ? '本题含图片，但当前 DeepSeek 接口没有接收图片内容，只能基于文字信息分析。' : ''
+        };
+    }
+    function sourceQuestionPayload() {
+        const q = currentQuestion();
+        return {
+            exerciseId: state.exercise && state.exercise.id || '',
+            exerciseName: state.exercise && state.exercise.name || '',
+            questionId: q && q.questionId || '',
+            title: q ? `第 ${state.current + 1} 题` : '',
+            stem: htmlToText(q && q.content),
+            material: htmlToText(q && q.material),
+            options: ((q && q.options) || []).map(htmlToText),
+            correctAnswer: answerLabel(correctChoiceIndex(q)),
+            solution: htmlToText(q && q.solution)
+        };
+    }
+    function openNoteModal() {
+        $('noteModal').classList.add('visible');
+    }
+    function closeNoteModal() {
+        $('noteModal').classList.remove('visible');
+    }
+    function renderNoteCandidates() {
+        if (!state.noteCandidates.length) {
+            $('noteList').innerHTML = '<div class="message assistant">AI 没有从本题中提取到值得积累的词语。你可以换一道言语题再试。</div>';
+            return;
+        }
+        $('noteList').innerHTML = state.noteCandidates.map((item, index) => `
+            <article class="note-item" data-index="${index}">
+                <div class="note-item-head">
+                    <input class="note-check" type="checkbox" ${item.selected ? 'checked' : ''}>
+                    <input class="note-field note-word" value="${escapeHtml(item.word)}" placeholder="词语/成语">
+                    <input class="note-field note-confusables" value="${escapeHtml((item.confusables || []).join('、'))}" placeholder="容易混淆的词语">
+                </div>
+                <textarea class="note-field note-area note-meaning" placeholder="规范含义">${escapeHtml(item.meaning)}</textarea>
+                <textarea class="note-field note-area note-distinction" placeholder="辨析技巧">${escapeHtml(item.distinction)}</textarea>
+                <textarea class="note-field note-area note-tips" placeholder="考场提醒">${escapeHtml(item.tips)}</textarea>
+            </article>
+        `).join('');
+    }
+    function readNoteCandidatesFromModal() {
+        return [...document.querySelectorAll('.note-item')].map(card => ({
+            selected: card.querySelector('.note-check').checked,
+            word: card.querySelector('.note-word').value.trim(),
+            meaning: card.querySelector('.note-meaning').value.trim(),
+            confusables: card.querySelector('.note-confusables').value.split(/[、,，;\s]+/).map(item => item.trim()).filter(Boolean),
+            distinction: card.querySelector('.note-distinction').value.trim(),
+            tips: card.querySelector('.note-tips').value.trim()
+        }));
+    }
+    async function generateNoteCandidates() {
+        if (state.noteLoading || !state.submitted || !currentQuestion() || !isVerbalQuestion(currentQuestion())) return;
+        openNoteModal();
+        $('noteStatus').innerText = 'AI 正在整理本题里的词语和成语...';
+        $('noteList').innerHTML = '<div class="message assistant thinking-message"><span>正在生成候选词</span><span class="thinking-dots" aria-hidden="true"><i></i><i></i><i></i></span></div>';
+        setNoteLoading(true);
+        try {
+            const data = await fetchJson('/api/ai/verbal-notes', {
+                method: 'POST',
+                headers: {'content-type': 'application/json'},
+                body: JSON.stringify(questionPayload())
+            });
+            state.noteCandidates = (data.entries || []).map(item => ({...item, selected: true}));
+            $('noteStatus').innerText = state.noteCandidates.length
+                ? '勾选想积累的词语，也可以先修改 AI 生成的内容。'
+                : '没有提取到候选词。';
+            renderNoteCandidates();
+        } catch (error) {
+            $('noteStatus').innerText = error.message;
+            $('noteList').innerHTML = '';
+        } finally {
+            setNoteLoading(false);
+        }
+    }
+    async function saveSelectedNotes() {
+        const entries = readNoteCandidatesFromModal().filter(item => item.selected && item.word);
+        if (!entries.length) {
+            $('noteStatus').innerText = '请至少勾选一个词语。';
+            return;
+        }
+        $('saveNoteBtn').disabled = true;
+        $('noteStatus').innerText = '正在保存到笔记本...';
+        try {
+            const data = await fetchJson('/api/verbal-notebook/entries', {
+                method: 'POST',
+                headers: {'content-type': 'application/json'},
+                body: JSON.stringify({
+                    entries,
+                    sourceQuestion: sourceQuestionPayload()
+                })
+            });
+            $('noteStatus').innerText = `已保存 ${data.entries.length} 条笔记。`;
+        } catch (error) {
+            $('noteStatus').innerText = error.message;
+        } finally {
+            $('saveNoteBtn').disabled = false;
+        }
+    }
+    function renderChat() {
+        if (!state.chat.length) {
+            $('chatBox').innerHTML = '<div class="message assistant">交卷后可生成本题思路，也可以围绕当前题追问。切换题目会清空线程。</div>';
+            return;
+        }
+        $('chatBox').innerHTML = state.chat.map(item => {
+            if (item.pending) {
+                return '<div class="message assistant thinking-message"><span>模型正在思考</span><span class="thinking-dots" aria-hidden="true"><i></i><i></i><i></i></span></div>';
+            }
+            return `<div class="message ${item.role}">${markdown(item.content)}</div>`;
+        }).join('');
+        renderMath($('chatBox'));
+    }
+    async function generateExplain() {
+        if (state.aiExplainLoading || !state.submitted || !currentQuestion()) return;
+        const activeThreadKey = threadKey();
+        setAiExplainLoading(true);
+        state.chat = [{role: 'assistant', content: '', pending: true}];
+        renderChat();
+        try {
+            const data = await fetchJson('/api/ai/explain', {
+                method: 'POST',
+                headers: {'content-type': 'application/json'},
+                body: JSON.stringify(questionPayload())
+            });
+            if (threadKey() !== activeThreadKey) return;
+            state.chat = [{role: 'assistant', content: data.content || '暂无 AI 解答'}];
+            saveThread();
+            renderChat();
+        } catch (error) {
+            if (threadKey() !== activeThreadKey) return;
+            state.chat = [{role: 'assistant', content: error.message}];
+            renderChat();
+        } finally {
+            setAiExplainLoading(false);
+        }
+    }
+    async function sendChat() {
+        const text = $('chatInput').value.trim();
+        if (!text || !state.submitted || !currentQuestion()) return;
+        $('chatInput').value = '';
+        state.chat.push({role: 'user', content: text});
+        state.chat.push({role: 'assistant', content: '思考中...'});
+        renderChat();
+        try {
+            const data = await fetchJson('/api/ai/chat', {
+                method: 'POST',
+                headers: {'content-type': 'application/json'},
+                body: JSON.stringify({question: questionPayload(), history: state.chat.slice(0, -1), message: text})
+            });
+            state.chat[state.chat.length - 1] = {role: 'assistant', content: data.content || '暂无回复'};
+            saveThread();
+            renderChat();
+        } catch (error) {
+            state.chat[state.chat.length - 1] = {role: 'assistant', content: error.message};
+            renderChat();
+        }
+    }
+
+    $('prevBtn').addEventListener('click', () => goQuestion(state.current - 1));
+    $('nextBtn').addEventListener('click', () => goQuestion(state.current + 1));
+    $('reloadBtn').addEventListener('click', () => state.exercise ? loadExercise(state.exercise.id) : loadHistory());
+    $('submitBtn').addEventListener('click', submitExercise);
+    $('aiExplainBtn').addEventListener('click', generateExplain);
+    $('noteBtn').addEventListener('click', generateNoteCandidates);
+    $('closeNoteModal').addEventListener('click', closeNoteModal);
+    $('noteModal').addEventListener('click', event => {
+        if (event.target === $('noteModal')) closeNoteModal();
+    });
+    $('saveNoteBtn').addEventListener('click', saveSelectedNotes);
+    $('sendChatBtn').addEventListener('click', sendChat);
+    $('chatInput').addEventListener('keydown', event => {
+        if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) sendChat();
+    });
+
+    loadHistory().then(() => {
+        if (INITIAL_EXERCISE_ID) loadExercise(INITIAL_EXERCISE_ID);
+    });
+</script>
+</body>
+</html>

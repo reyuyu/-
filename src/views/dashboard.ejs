@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>粉笔刷题台</title>
+    <style>
+        :root {
+            --paper: #f4f1ea;
+            --surface: #fffdf8;
+            --surface-soft: #ebe5da;
+            --line: #d9d0c2;
+            --text: #343d3a;
+            --muted: #7a817c;
+            --sage: #708579;
+            --sage-2: #8da196;
+            --blue: #7d929c;
+            --clay: #b98f7e;
+            --mauve: #aa9aa3;
+            --ok: #6f8b76;
+            --warn: #b87f69;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--paper);
+            color: var(--text);
+            font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+        }
+
+        button, input, select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .layout {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+        }
+
+        .main {
+            padding: 28px clamp(24px, 5vw, 64px);
+        }
+
+        .side {
+            border-left: 1px solid var(--line);
+            background: #ece6dc;
+            padding: 28px 22px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 30px;
+            letter-spacing: 0;
+        }
+
+        .brand p {
+            margin: 8px 0 0;
+            color: var(--muted);
+        }
+
+        .nav {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            height: 38px;
+            padding: 0 16px;
+            border-radius: 7px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn.primary {
+            background: var(--sage);
+            border-color: var(--sage);
+            color: #fff;
+        }
+
+        .btn.subtle {
+            background: transparent;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(360px, 520px) minmax(0, 1fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .panel {
+            border: 1px solid var(--line);
+            background: rgba(255, 253, 248, .78);
+            border-radius: 8px;
+            padding: 18px;
+        }
+
+        .panel h2 {
+            margin: 0 0 14px;
+            font-size: 18px;
+        }
+
+        .section-title {
+            margin: 0 0 12px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .mode {
+            height: 42px;
+            border-radius: 7px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--muted);
+        }
+
+        .mode.active {
+            background: var(--sage);
+            border-color: var(--sage);
+            color: #fff;
+        }
+
+        .select, .input {
+            width: 100%;
+            min-height: 40px;
+            border-radius: 7px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--text);
+            padding: 0 12px;
+            margin-bottom: 12px;
+        }
+
+        .hint {
+            color: var(--muted);
+            min-height: 20px;
+            line-height: 1.6;
+            margin: 0 0 14px;
+        }
+
+        .records {
+            display: grid;
+            gap: 10px;
+        }
+
+        .record {
+            width: 100%;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: var(--surface);
+            padding: 14px;
+            color: var(--text);
+            text-align: left;
+        }
+
+        .record:hover {
+            border-color: var(--sage-2);
+        }
+
+        .record strong {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .record-meta {
+            margin-top: 8px;
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .stat {
+            border: 1px solid var(--line);
+            background: rgba(255, 253, 248, .7);
+            border-radius: 8px;
+            padding: 14px;
+        }
+
+        .stat strong {
+            display: block;
+            color: var(--sage);
+            font-size: 26px;
+        }
+
+        .stat span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .ai-form {
+            display: grid;
+            gap: 10px;
+        }
+
+        .ai-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .status {
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .status.ok { color: var(--ok); }
+        .status.warn { color: var(--warn); }
+
+        .secondary-links {
+            display: grid;
+            gap: 10px;
+        }
+
+        .secondary-links a {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: rgba(255, 253, 248, .66);
+        }
+
+        .feature-card {
+            display: block;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--sage-2);
+            background: #eef0ea;
+            margin-bottom: 14px;
+        }
+
+        .feature-card strong {
+            display: block;
+            font-size: 19px;
+            margin-bottom: 8px;
+        }
+
+        .feature-card span {
+            display: block;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .account-actions {
+            display: grid;
+            gap: 10px;
+        }
+
+        @media (max-width: 980px) {
+            .layout {
+                display: block;
+            }
+            .side {
+                border-left: 0;
+                border-top: 1px solid var(--line);
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="layout">
+    <main class="main">
+        <header class="topbar">
+            <div class="brand">
+                <h1>粉笔刷题台</h1>
+                <p>选择练习、继续记录、交卷复盘，都从这里开始。</p>
+            </div>
+            <nav class="nav">
+                <a class="btn primary" href="/verbal-notebook">言语笔记本</a>
+                <a class="btn subtle" href="/setup">重新扫码登录</a>
+            </nav>
+        </header>
+
+        <section class="stats">
+            <div class="stat"><strong id="statCount">0</strong><span>最近练习</span></div>
+            <div class="stat"><strong id="statDone">0</strong><span>累计题量</span></div>
+            <div class="stat"><strong id="statAi">-</strong><span>AI 状态</span></div>
+        </section>
+
+        <div class="grid">
+            <section class="panel">
+                <h2>刷题选项</h2>
+                <div class="mode-grid">
+                    <button class="mode active" data-mode="quick">快速</button>
+                    <button class="mode" data-mode="random">随机</button>
+                    <button class="mode" data-mode="keypoint">专项</button>
+                </div>
+                <select id="categorySelect" class="select" disabled>
+                    <option value="">专项模式可选择知识点</option>
+                </select>
+                <p id="createHint" class="hint">快速练习会让粉笔自动生成一组新题。</p>
+                <button id="createBtn" class="btn primary" style="width:100%;">创建并开始</button>
+            </section>
+
+            <section class="panel">
+                <h2>刷题记录</h2>
+                <div id="records" class="records">
+                    <div class="status">加载中...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <aside class="side">
+        <section class="panel">
+            <h2>DeepSeek AI</h2>
+            <div class="ai-form">
+                <input id="deepseekApiKey" class="input" type="password" placeholder="DeepSeek API Key">
+                <div class="ai-row">
+                    <input id="deepseekModel" class="input" type="text" placeholder="deepseek-chat">
+                    <input id="deepseekBaseUrl" class="input" type="text" placeholder="https://api.deepseek.com">
+                </div>
+                <button id="saveAiConfig" class="btn primary" type="button">保存配置</button>
+                <div id="aiStatus" class="status">读取中...</div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>言语笔记</h2>
+            <a class="feature-card" href="/verbal-notebook">
+                <strong>打开言语理解笔记本</strong>
+                <span>积累词语、成语、近义辨析和来源例题。</span>
+            </a>
+        </section>
+
+        <section class="panel">
+            <h2>账号</h2>
+            <div class="account-actions">
+                <a class="btn" href="/setup">重新扫码登录</a>
+            </div>
+        </section>
+    </aside>
+</div>
+
+<script>
+    const state = {
+        mode: 'quick',
+        categories: [],
+        categoryError: ''
+    };
+
+    function $(id) {
+        return document.getElementById(id);
+    }
+
+    async function fetchJson(url, options = {}) {
+        const res = await fetch(url, options);
+        const data = await res.json();
+        if (!res.ok || data.code === 500) {
+            throw new Error(data.message || '请求失败');
+        }
+        return data;
+    }
+
+    function setMode(mode) {
+        state.mode = mode;
+        document.querySelectorAll('.mode').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === mode);
+        });
+        $('categorySelect').disabled = mode !== 'keypoint';
+        const hints = {
+            quick: '快速练习会让粉笔自动生成一组新题。',
+            random: '随机练习会从行测题库中抽题。',
+            keypoint: state.categoryError || '专项练习会按选择的知识点创建。'
+        };
+        $('createHint').innerText = hints[mode];
+    }
+
+    async function loadCategories() {
+        try {
+            state.categories = await fetchJson('/api/practice/categories');
+            state.categoryError = '';
+            $('categorySelect').innerHTML = state.categories.map(item => {
+                return `<option value="${item.id}">${item.path || item.name}</option>`;
+            }).join('');
+            setMode(state.mode);
+        } catch (error) {
+            state.categoryError = error.message;
+            $('categorySelect').innerHTML = '<option value="">分类读取失败</option>';
+            setMode(state.mode);
+        }
+    }
+
+    async function loadHistory() {
+        const records = $('records');
+        try {
+            const history = await fetchJson('/api/practice/history');
+            $('statCount').innerText = history.length;
+            $('statDone').innerText = history.reduce((sum, item) => sum + Number(item.answerCount || 0), 0);
+            if (!history.length) {
+                records.innerHTML = '<div class="status">暂无记录，先创建一套练习。</div>';
+                return;
+            }
+            records.innerHTML = history.slice(0, 12).map(item => `
+                <button class="record" data-id="${item.id}">
+                    <strong>${item.name || '未命名练习'}</strong>
+                    <span class="record-meta"><span>${item.answerCount || 0} 题</span><span>${item.finishedTime || ''}</span></span>
+                    <span class="record-meta"><span>${item.correctRate ? item.correctRate + '%' : '未统计'}</span><span>${item.elapsedMinutes || 0} 分钟</span></span>
+                </button>
+            `).join('');
+            records.querySelectorAll('.record').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    window.location.href = `/practice/${btn.dataset.id}`;
+                });
+            });
+        } catch (error) {
+            records.innerHTML = `<div class="status warn">${error.message}</div>`;
+        }
+    }
+
+    async function createExercise() {
+        const btn = $('createBtn');
+        btn.disabled = true;
+        $('createHint').innerText = '正在创建练习...';
+        try {
+            const result = await fetchJson('/api/practice/create', {
+                method: 'POST',
+                headers: {'content-type': 'application/json'},
+                body: JSON.stringify({
+                    mode: state.mode,
+                    keypointId: $('categorySelect').value
+                })
+            });
+            window.location.href = `/practice/${result.exerciseId}`;
+        } catch (error) {
+            $('createHint').innerText = error.message;
+            btn.disabled = false;
+        }
+    }
+
+    async function loadAiConfig() {
+        try {
+            const result = await fetchJson('/api/ai/config');
+            $('deepseekModel').value = result.model || 'deepseek-chat';
+            $('deepseekBaseUrl').value = result.baseUrl || 'https://api.deepseek.com';
+            $('aiStatus').innerText = result.configured ? `已启用 ${result.maskedApiKey || ''}` : '未配置';
+            $('aiStatus').className = result.configured ? 'status ok' : 'status warn';
+            $('statAi').innerText = result.configured ? '已启用' : '未配置';
+        } catch (error) {
+            $('aiStatus').innerText = error.message;
+            $('aiStatus').className = 'status warn';
+        }
+    }
+
+    async function saveAiConfig() {
+        $('aiStatus').innerText = '保存中...';
+        try {
+            const result = await fetchJson('/api/ai/config', {
+                method: 'POST',
+                headers: {'content-type': 'application/json'},
+                body: JSON.stringify({
+                    deepseekApiKey: $('deepseekApiKey').value,
+                    deepseekModel: $('deepseekModel').value,
+                    deepseekBaseUrl: $('deepseekBaseUrl').value
+                })
+            });
+            $('deepseekApiKey').value = '';
+            $('aiStatus').innerText = result.configured ? `已启用 ${result.maskedApiKey || ''}` : '未配置';
+            $('aiStatus').className = result.configured ? 'status ok' : 'status warn';
+            $('statAi').innerText = result.configured ? '已启用' : '未配置';
+        } catch (error) {
+            $('aiStatus').innerText = error.message;
+            $('aiStatus').className = 'status warn';
+        }
+    }
+
+    document.querySelectorAll('.mode').forEach(btn => {
+        btn.addEventListener('click', () => setMode(btn.dataset.mode));
+    });
+    $('createBtn').addEventListener('click', createExercise);
+    $('saveAiConfig').addEventListener('click', saveAiConfig);
+
+    setMode('quick');
+    loadCategories();
+    loadHistory();
+    loadAiConfig();
+</script>
+</body>
+</html>

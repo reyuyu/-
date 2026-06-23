@@ -1,0 +1,43 @@
+{
+  "name": "fenbi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "start:desktop": "node src/launcher.js",
+    "build:launcher": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-launcher.ps1",
+    "build:win": "pkg src/launcher.js --targets node18-win-x64 --output dist/fenbi-helper.exe",
+    "build:mac:x64": "pkg src/launcher.js --targets node18-macos-x64 --output dist/fenbi-helper-macos-x64",
+    "build:mac:arm64": "pkg src/launcher.js --targets node18-macos-arm64 --output dist/fenbi-helper-macos-arm64",
+    "build:mac": "npm run build:mac:x64 && npm run build:mac:arm64",
+    "build:mac:release": "node scripts/build-mac-release.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^3.1.3",
+    "koa": "^2.13.0",
+    "koa-body": "^4.2.0",
+    "koa-ejs": "^4.3.0",
+    "koa-router": "^9.0.1",
+    "koa-static": "^5.0.0",
+    "lodash": "^4.17.15",
+    "moment": "^2.27.0",
+    "percentile": "^1.4.0",
+    "qrcode": "^1.5.4",
+    "qs": "^6.9.4",
+    "request": "^2.88.2",
+    "set-cookie-parser": "^2.4.6"
+  },
+  "devDependencies": {
+    "@yao-pkg/pkg": "^6.20.0"
+  },
+  "pkg": {
+    "assets": [
+      "src/views/**/*"
+    ]
+  }
+}

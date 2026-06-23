@@ -1,0 +1,51 @@
+name: Build Mac Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'src/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/build-mac.yml'
+
+jobs:
+  build-mac:
+    name: Build macOS binaries
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Mac release folder
+        run: npm run build:mac:release
+
+      - name: Create archives with executable permissions
+        run: |
+          cd dist/mac-release
+          tar -czf fenbi-helper-macos-arm64.tar.gz "Apple芯片M1-M4"
+          tar -czf fenbi-helper-macos-x64.tar.gz "Intel芯片"
+          tar -czf fenbi-helper-mac-release.tar.gz .
+
+      - name: Upload Mac artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fenbi-helper-mac-release
+          path: |
+            dist/mac-release/*.tar.gz
+            dist/mac-release/Mac使用说明.md
+          if-no-files-found: error
